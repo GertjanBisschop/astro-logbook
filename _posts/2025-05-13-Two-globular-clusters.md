@@ -1,4 +1,5 @@
 ---
+layout: post
 title: Two globular clusters
 date: 2025-05-13
 ---

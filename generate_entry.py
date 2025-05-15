@@ -41,12 +41,12 @@ def get_weather_summary(lat, lon):
         f"{cloud_desc}, Wind: {wind_speed} km/h from {wind_dir}°, {wind_desc}"
     )
 
-def create_post(title, notes, lat, lon):
-    date = datetime.date.today()
+def create_post(title, notes, lat, lon, date):
     filename = f"_posts/{date}-{title.replace(' ', '-')}.md"
     weather = get_weather_summary(lat, lon)
 
     content = f"""---
+layout: post
 title: {title}
 date: {date}
 ---
@@ -61,14 +61,23 @@ date: {date}
         f.write(content)
     print(f"Entry created: {filename}")
 
+def parse_date(date_str):
+    try:
+        return datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+    except ValueError:
+        raise click.BadParameter("Date must be in YYYY-MM-DD format.")
+
+
 @click.command()
-@click.argument('title')
-@click.argument('notes')
+@click.option('--title', '-t', default="*")
+@click.option('--notes', '-n', default="TBD")
 @click.option('--lat', default=DEFAULT_LAT, show_default=True, help='Latitude')
 @click.option('--lon', default=DEFAULT_LON, show_default=True, help='Longitude')
-def main(title, notes, lat, lon):
+@click.option('--date', default=lambda: datetime.date.today().isoformat(), show_default='today', help='Date in YYYY-MM-DD format')
+def main(title, notes, lat, lon, date):
     """Create a new astronomy log entry with TITLE and NOTES."""
-    create_post(title, notes, lat, lon)
+    date_obj = parse_date(date)
+    create_post(title, notes, lat, lon, date_obj)
 
 if __name__ == "__main__":
     main()
